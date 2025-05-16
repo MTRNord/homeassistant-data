@@ -1,6 +1,8 @@
 blueprint:
-  name: Fenster geöffnet -> Heizung aus
-  description: Wenn ein oder mehrere Fenster geöffnet werden deaktiviere die Heizung und senke die Zieltemperatur
+  name: Fenster status -> Heizungssteuerung
+  description: |
+    Wenn ein oder mehrere Fenster geöffnet werden deaktiviere die Heizung und senke die Zieltemperatur.
+    Wenn alle Fenster geschlossen sind aktiviere die Heizung und setze die Zieltemperatur.
   domain: automation
   input:
     window_sensor:
@@ -17,7 +19,7 @@ blueprint:
 
     thermostat:
       name: Thermostat
-      description: Thermostat das deaktiviert werden soll
+      description: Thermostat das geändert werden soll
       selector:
         entity:
           filter:
@@ -70,20 +72,20 @@ actions:
               {% endfor %}
               {{ any_open }}
         sequence:
-          - service: climate.set_temperature
+          - action: climate.set_temperature
             target:
               entity_id: !input thermostat
             data:
               temperature: !input target_temp_windows_open
-          - service: climate.turn_off
+          - action: climate.turn_off
             target:
               entity_id: !input thermostat
     default:
-      - service: climate.set_temperature
+      - action: climate.set_temperature
         target:
           entity_id: !input thermostat
         data:
           temperature: !input target_temp_windows_closed
-      - service: climate.turn_on
+      - action: climate.turn_on
         target:
           entity_id: !input thermostat
