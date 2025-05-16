@@ -74,12 +74,18 @@ actions:
           - action: climate.turn_off
             target:
               entity_id: !input thermostat
-    default:
-      - action: climate.set_temperature
-        target:
-          entity_id: !input thermostat
-        data:
-          temperature: !input target_temp_windows_closed
-      - action: climate.turn_on
-        target:
-          entity_id: !input thermostat
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: !input window_sensor
+                state: "off"
+        sequence:
+          - action: climate.set_temperature
+            target:
+              entity_id: !input thermostat
+            data:
+              temperature: !input target_temp_windows_closed
+          - action: climate.turn_on
+            target:
+              entity_id: !input thermostat
