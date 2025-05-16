@@ -25,7 +25,7 @@ blueprint:
           filter:
             - domain: climate
               supported_features:
-                - climate.ClimateEntityFeature.TARGET_TEMPERATURE
+                - "climate.ClimateEntityFeature.TARGET_TEMPERATURE"
           multiple: true
 
     target_temp_windows_open:
