@@ -57,14 +57,16 @@ triggers:
       hours: 0
       minutes: 0
       seconds: 30
+
+variables:
+  window_entities: !input window_sensor
 actions:
   - choose:
       - conditions:
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: !input window_sensor
-                state: "on"
+          - condition: template
+            value_template: >
+              {% set open_windows = states | selectattr('entity_id', 'in', window_entities) | selectattr('state', 'eq', 'on') | list %}
+              {{ open_windows | length > 0 }}
         sequence:
           - action: climate.set_temperature
             target:
