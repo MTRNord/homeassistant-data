@@ -83,11 +83,11 @@ actions:
                 entity_id: !input window_sensor
                 state: "off"
         sequence:
+          - action: climate.turn_on
+            target:
+              entity_id: !input thermostat
           - action: climate.set_temperature
             target:
               entity_id: !input thermostat
             data:
               temperature: !input target_temp_windows_closed
-          - action: climate.turn_on
-            target:
-              entity_id: !input thermostat
