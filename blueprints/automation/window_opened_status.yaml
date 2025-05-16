@@ -66,8 +66,9 @@ actions:
             value_template: >
               {% set any_open = false %}
               {% for entity_id in window_sensors %}
-                {% if states(entity_id) == 'on' %}
+                {% if is_state(entity_id,'on') %}
                   {% set any_open = true %}
+                  {% break %}
                 {% endif %}
               {% endfor %}
               {{ any_open }}
