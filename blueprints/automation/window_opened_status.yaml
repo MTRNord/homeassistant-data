@@ -25,6 +25,29 @@ blueprint:
               supported_features:
                 - climate.ClimateEntityFeature.TARGET_TEMPERATURE
           multiple: true
+
+    target_temp_windows_open:
+      name: Temperatur bei geöffnetem Fenster
+      description: Zieltemperatur wenn ein Fenster geöffnet ist
+      default: 5
+      selector:
+        number:
+          min: 5
+          max: 30
+          step: 0.5
+          unit_of_measurement: °C
+
+    target_temp_windows_closed:
+      name: Temperatur bei geschlossenem Fenster
+      description: Zieltemperatur wenn alle Fenster geschlossen sind
+      default: 21
+      selector:
+        number:
+          min: 5
+          max: 30
+          step: 0.5
+          unit_of_measurement: °C
+
 triggers:
   - trigger: state
     entity_id: !input window_sensor
@@ -32,14 +55,35 @@ triggers:
       hours: 0
       minutes: 0
       seconds: 30
-    id: window_opened
+variables:
+  window_sensors: !input window_sensor
 actions:
-  - action: >
-      {% if trigger.to_state.state == 'on' %}
-        climate.set_temperature = 5
-        climate.turn_off
-      {% else %}
-        climate.set_temperature = 21
-        climate.turn_on
-      {% endif %}
-    target: !input thermostat
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >
+              {% set any_open = false %}
+              {% for entity_id in window_sensors %}
+                {% if states(entity_id) == 'on' %}
+                  {% set any_open = true %}
+                {% endif %}
+              {% endfor %}
+              {{ any_open }}
+        sequence:
+          - service: climate.set_temperature
+            target:
+              entity_id: !input thermostat
+            data:
+              temperature: !input target_temp_windows_open
+          - service: climate.turn_off
+            target:
+              entity_id: !input thermostat
+    default:
+      - service: climate.set_temperature
+        target:
+          entity_id: !input thermostat
+        data:
+          temperature: !input target_temp_windows_closed
+      - service: climate.turn_on
+        target:
+          entity_id: !input thermostat
